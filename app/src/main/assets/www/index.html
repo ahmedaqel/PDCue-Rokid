@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PDCue</title>
+<style>
+:root{--bg:#07100c;--card:#102018;--line:#244332;--text:#eef8f1;--muted:#9cb5a5;--accent:#8df3a7;--warn:#ffd27a;--danger:#ff9d9d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{position:sticky;top:0;background:#09140f;border-bottom:1px solid var(--line);padding:14px 16px;z-index:5}
+h1{font-size:20px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:3px}
+.wrap{padding:12px;max-width:900px;margin:auto}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+button,.btn{background:var(--card);border:1px solid var(--line);color:var(--text);padding:14px;border-radius:12px;text-align:left;font-size:14px}
+button:active{transform:scale(.99)}.full{grid-column:1/-1}.accent{border-color:var(--accent)}
+section{display:none}.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}textarea,input,select{width:100%;background:#0b1711;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}
+textarea{min-height:150px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1;min-width:120px}
+.tag{display:inline-block;padding:4px 8px;border-radius:999px;background:#173322;color:var(--accent);font-size:11px;margin:2px}
+.alert{border-left:4px solid var(--warn);padding-left:10px}.danger{border-left-color:var(--danger)}
+small{color:var(--muted)}.rtl{direction:rtl;text-align:right}
+.result{white-space:pre-wrap;line-height:1.45}.back{margin-bottom:10px}
+</style>
+</head>
+<body>
+<header><h1>PDCue</h1><div class="sub">Project Development & Delivery Director Copilot · v0.3.1</div></header>
+<div class="wrap">
+<section id="home" class="active">
+<div class="card"><b>Project</b><br><small>Local demo profile · Rokid gateway prepared</small></div>
+<div class="grid">
+<button onclick="openPage('meeting')"><b>03 Meeting Copilot</b><br><small>Risks, commitments, actions, MOM draft</small></button>
+<button onclick="openPage('site')"><b>04 Site Vision</b><br><small>Photo observations and walk report</small></button>
+<button onclick="openPage('drawing')"><b>05 Drawing Intelligence</b><br><small>Revision and discrepancy checklist</small></button>
+<button onclick="openPage('contract')"><b>06 Contracts & FIDIC</b><br><small>Contractual risk prompts</small></button>
+<button onclick="openPage('language')"><b>07 Languages</b><br><small>English · العربية · 中文</small></button>
+<button onclick="openPage('knowledge')"><b>08 Project Knowledge</b><br><small>Contracts, MOMs, approvals, programme</small></button>
+<button onclick="openPage('roadmap')"><b>01 Requirements & Roadmap</b></button>
+<button onclick="openPage('rokid')"><b>02 Rokid / AIUI</b></button>
+<button class="full" onclick="openPage('release')"><b>09 Releases & Test Builds</b><br><small>Current build, gates and field validation</small></button>
+</div>
+</section>
+
+<section id="meeting">
+<button class="back" onclick="home()">← Home</button><h2>Meeting Copilot</h2>
+<div class="card">
+<label>Paste or dictate meeting transcript</label>
+<textarea id="meetingText" placeholder="Example: Please proceed with the additional work without cost or time impact. We will issue the revised drawing tomorrow."></textarea>
+<div class="row"><button class="accent" onclick="analyzeMeeting()">Analyze</button><button onclick="demoMeeting()">Load demo</button></div>
+</div>
+<div id="meetingResult"></div>
+</section>
+
+<section id="site">
+<button class="back" onclick="home()">← Home</button><h2>Construction Vision & Site Reports</h2>
+<div class="card">
+<label>Photo / evidence</label><input type="file" accept="image/*" capture="environment">
+<label>Location</label><input id="siteLoc" placeholder="LV1C · Level 5 · Corridor">
+<label>Observation</label><textarea id="siteObs" placeholder="Describe progress, defect, snag, material, safety, access or evidence."></textarea>
+<label>Category</label><select id="siteCat"><option>Progress</option><option>Defect</option><option>Snag</option><option>Safety</option><option>Material</option><option>Access / Logistics</option><option>Authority / Inspection</option><option>Evidence</option></select>
+<button class="accent" onclick="makeSite()">Create draft observation</button>
+</div><div id="siteResult"></div>
+</section>
+
+<section id="drawing">
+<button class="back" onclick="home()">← Home</button><h2>Drawings & Document Intelligence</h2>
+<div class="card alert"><b>Controlled-document rule</b><br><small>Never treat a photographed or uploaded drawing as current until revision/status is verified.</small></div>
+<div class="card">
+<label>Drawing / document notes</label><textarea id="drawText" placeholder="Paste title block, revision notes, dimensions or discrepancy description."></textarea>
+<button class="accent" onclick="reviewDrawing()">Run discrepancy checklist</button>
+</div><div id="drawResult"></div>
+</section>
+
+<section id="contract">
+<button class="back" onclick="home()">← Home</button><h2>Contracts & FIDIC</h2>
+<div class="card alert"><b>Source-first rule</b><br><small>PDCue must retrieve the signed project contract and Particular Conditions before citing a clause number.</small></div>
+<div class="card">
+<label>Statement / instruction / letter text</label><textarea id="contractText" placeholder="Example: Contractor shall execute this additional work immediately without entitlement to additional time or cost."></textarea>
+<button class="accent" onclick="reviewContract()">Identify contractual risks</button>
+</div><div id="contractResult"></div>
+</section>
+
+<section id="language">
+<button class="back" onclick="home()">← Home</button><h2>Arabic / English / Chinese</h2>
+<div class="card">
+<label>Interface language</label>
+<select onchange="setLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="zh">中文</option></select>
+<div id="langSample" class="card">Contractual alert: confirm written instruction and assess time/cost implications before committing.</div>
+</div>
+</section>
+
+<section id="knowledge">
+<button class="back" onclick="home()">← Home</button><h2>Project Knowledge & Integrations</h2>
+<div class="card"><span class="tag">Contracts</span><span class="tag">Correspondence</span><span class="tag">MOMs</span><span class="tag">P6 Programme</span><span class="tag">Approvals</span><span class="tag">VO / Claims</span><span class="tag">Procurement</span><span class="tag">Authorities</span></div>
+<div class="card"><b>Target behavior</b><br><small>Every high-risk answer must show project, source document, revision/date and verification state.</small></div>
+</section>
+
+<section id="roadmap">
+<button class="back" onclick="home()">← Home</button><h2>Requirements & Roadmap</h2>
+<div class="card">Phase 1 · Rokid shell / device proof</div><div class="card">Phase 2 · Meeting Copilot MVP</div><div class="card">Phase 3 · Site Vision MVP</div><div class="card">Phase 4 · Drawings / Documents</div><div class="card">Phase 5 · Contracts / FIDIC</div><div class="card">Phase 6 · Trilingual layer</div><div class="card">Phase 7 · Project knowledge</div><div class="card">Phase 8 · Release hardening</div>
+</section>
+
+<section id="rokid">
+<button class="back" onclick="home()">← Home</button><h2>Rokid / AIUI Development</h2>
+<div class="card"><b>Current deployment</b><br>Android phone companion APK</div>
+<div class="card"><b>Prepared integration boundary</b><br>CXR-L / Hi Rokid → glasses display, microphone, camera and controls.</div>
+<div class="card alert"><b>Pending physical-device integration</b><br><small>This APK can run independently now. Rokid SDK calls require validation against your exact glasses/firmware.</small></div>
+</section>
+
+<section id="release">
+<button class="back" onclick="home()">← Home</button><h2>Releases & Test Builds</h2>
+<div class="card"><b>v0.3.1</b><br><small>Single Android APK shell · nine modules · EN/AR/ZH UI mode · offline meeting/site/document rules · Rokid gateway boundary.</small></div>
+<div class="card"><b>Release gates</b><br>Install → launch → navigation → meeting analysis → site record → document/contract checks → language switch → physical Rokid integration.</div>
+</section>
+</div>
+<script>
+function openPage(id){document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');scrollTo(0,0)}
+function home(){openPage('home')}
+function demoMeeting(){document.getElementById('meetingText').value="Client: Please accelerate and complete by 30 November without additional cost.\nContractor: We will submit the revised programme tomorrow.\nConsultant: Proceed with the additional joinery work and we will formalize the instruction later."}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function analyzeMeeting(){
+ const t=document.getElementById('meetingText').value; const lines=t.split(/\n+/).filter(Boolean); let out='';
+ const rules=[
+  [/additional|variation|extra work|joinery|scope/i,'SCOPE / COST ALERT','Confirm written instruction, scope, valuation basis and entitlement before commitment.'],
+  [/accelerat|complete by|delay|extension of time|EOT|time impact/i,'TIME ALERT','Check approved baseline, critical path, acceleration resources, notice requirements and cost/time consequences.'],
+  [/without additional cost|no cost|at your cost|free of cost/i,'COMMERCIAL ALERT','Do not accept a cost waiver unless expressly authorized and supported by the contract.'],
+  [/we will|shall submit|will issue|commit|agreed/i,'COMMITMENT','Capture owner, due date, dependency and source meeting.'],
+  [/formalize.*later|verbal|proceed now/i,'INSTRUCTION RISK','Request contemporaneous written confirmation and reserve rights where applicable.']
+ ];
+ lines.forEach((line,i)=>rules.forEach(r=>{if(r[0].test(line))out+='<div class="card alert"><b>'+r[1]+'</b><br>'+esc(r[2])+'<br><small>Source L'+(i+1)+': '+esc(line)+'</small></div>'}));
+ if(!out)out='<div class="card">No rule-based high-risk cue detected. Review manually.</div>';
+ document.getElementById('meetingResult').innerHTML=out;
+}
+function makeSite(){
+ const loc=document.getElementById('siteLoc').value||'Location not set'; const obs=document.getElementById('siteObs').value||'Observation not entered'; const cat=document.getElementById('siteCat').value;
+ document.getElementById('siteResult').innerHTML='<div class="card"><b>DRAFT SITE OBSERVATION</b><br><small>Category</small> '+esc(cat)+'<br><small>Location</small> '+esc(loc)+'<br><small>Observation</small><div class="result">'+esc(obs)+'</div><br><small>Status: Requires review before issue.</small></div>';
+}
+function reviewDrawing(){
+ const t=document.getElementById('drawText').value; let checks=['Verify drawing number, revision and approval status','Check dimensions/levels against latest coordinated references','Check architectural/structural/MEP interface','Identify superseded references and conflicting notes','Record uncertainty and source evidence'];
+ document.getElementById('drawResult').innerHTML='<div class="card"><b>DISCREPANCY CHECKLIST</b><div class="result">• '+checks.join('\n• ')+'\n\nInput:\n'+esc(t)+'</div></div>';
+}
+function reviewContract(){
+ const t=document.getElementById('contractText').value; let items=[];
+ if(/additional|variation|extra work|scope/i.test(t))items.push('Potential scope/variation event: retrieve signed change/instruction provisions.');
+ if(/without.*(cost|time)|no.*(cost|time)|waive|waiver/i.test(t))items.push('Potential waiver of entitlement: do not accept without authorized contractual review.');
+ if(/immediately|proceed|verbal|later/i.test(t))items.push('Instruction/notice risk: preserve contemporaneous record and written confirmation.');
+ if(!items.length)items.push('No rule-based issue detected. Retrieve governing contract before legal/contractual conclusion.');
+ document.getElementById('contractResult').innerHTML='<div class="card alert"><b>CONTRACT REVIEW</b><div class="result">• '+items.join('\n• ')+'\n\nNo FIDIC clause number is cited until the actual project contract is loaded.</div></div>';
+}
+function setLang(v){
+ const b=document.body,s=document.getElementById('langSample'); b.classList.toggle('rtl',v==='ar');
+ if(v==='ar')s.textContent='تنبيه تعاقدي: تأكد من وجود تعليمات خطية وقيّم أثر الوقت والتكلفة قبل الالتزام.';
+ else if(v==='zh')s.textContent='合同风险提示：承诺前确认书面指令，并评估工期和费用影响。';
+ else s.textContent='Contractual alert: confirm written instruction and assess time/cost implications before committing.';
+}
+</script>
+</body></html>
