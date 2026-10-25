@@ -38,11 +38,11 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/PDCue-v0.3.1-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/PDCue-v0.4.0-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PDCue-v0.3.1-debug-apk
-          path: release/PDCue-v0.3.1-debug.apk
+          name: PDCue-v0.4.0-debug-apk
+          path: release/PDCue-v0.4.0-debug.apk
           retention-days: 30
