@@ -22,7 +22,7 @@ small{color:var(--muted)}.rtl{direction:rtl;text-align:right}
 </style>
 </head>
 <body>
-<header><h1>PDCue</h1><div class="sub">Project Development & Delivery Director Copilot · v0.3.1</div></header>
+<header><h1>PDCue</h1><div class="sub">Project Development & Delivery Director Copilot · v0.4.0</div></header>
 <div class="wrap">
 <section id="home" class="active">
 <div class="card"><b>Project</b><br><small>Local demo profile · Rokid gateway prepared</small></div>
@@ -35,6 +35,7 @@ small{color:var(--muted)}.rtl{direction:rtl;text-align:right}
 <button onclick="openPage('knowledge')"><b>08 Project Knowledge</b><br><small>Contracts, MOMs, approvals, programme</small></button>
 <button onclick="openPage('roadmap')"><b>01 Requirements & Roadmap</b></button>
 <button onclick="openPage('rokid')"><b>02 Rokid / AIUI</b></button>
+<button class="full accent" onclick="openPage('diag')"><b>02A Hardware Diagnostic</b><br><small>Camera · microphone · keys · IMU · network · storage</small></button>
 <button class="full" onclick="openPage('release')"><b>09 Releases & Test Builds</b><br><small>Current build, gates and field validation</small></button>
 </div>
 </section>
@@ -52,12 +53,35 @@ small{color:var(--muted)}.rtl{direction:rtl;text-align:right}
 <section id="site">
 <button class="back" onclick="home()">← Home</button><h2>Construction Vision & Site Reports</h2>
 <div class="card">
-<label>Photo / evidence</label><input type="file" accept="image/*" capture="environment">
+<label>Photo / evidence</label>
+<button class="accent" onclick="nativeCamera()">Capture with glasses camera</button>
+<div id="siteCamStatus" class="card"><small>No photo captured in this session.</small></div>
 <label>Location</label><input id="siteLoc" placeholder="LV1C · Level 5 · Corridor">
 <label>Observation</label><textarea id="siteObs" placeholder="Describe progress, defect, snag, material, safety, access or evidence."></textarea>
 <label>Category</label><select id="siteCat"><option>Progress</option><option>Defect</option><option>Snag</option><option>Safety</option><option>Material</option><option>Access / Logistics</option><option>Authority / Inspection</option><option>Evidence</option></select>
 <button class="accent" onclick="makeSite()">Create draft observation</button>
 </div><div id="siteResult"></div>
+</section>
+
+<section id="diag">
+<button class="back" onclick="home()">← Home</button><h2>Hardware Diagnostic</h2>
+<div class="card"><b>Device</b><div id="diag_device" class="result">Tap DEVICE INFO.</div></div>
+<div class="grid">
+<button onclick="diagCamera()"><b>CAMERA</b><br><small>Direct Camera2 still capture</small></button>
+<button onclick="diagMic()"><b>MICROPHONE</b><br><small>Record 5 seconds</small></button>
+<button onclick="diagPlay()"><b>PLAY AUDIO</b><br><small>Play last mic recording</small></button>
+<button onclick="diagImu()"><b>IMU</b><br><small>Gyro / accelerometer</small></button>
+<button onclick="diagNetwork()"><b>NETWORK</b><br><small>Wi-Fi / internet status</small></button>
+<button onclick="diagStorage()"><b>STORAGE</b><br><small>Local write test</small></button>
+<button onclick="diagDevice()"><b>DEVICE INFO</b><br><small>Model / Android / API</small></button>
+<button onclick="armKeys()"><b>KEY TEST</b><br><small>Press a physical control</small></button>
+</div>
+<div id="diag_camera" class="card"><small>Camera: not tested.</small></div>
+<div id="diag_mic" class="card"><small>Microphone: not tested.</small></div>
+<div id="diag_imu" class="card"><small>IMU: not tested.</small></div>
+<div id="diag_network" class="card"><small>Network: not tested.</small></div>
+<div id="diag_storage" class="card"><small>Storage: not tested.</small></div>
+<div id="diag_key" class="card"><small>Keys: tap KEY TEST, then press a glasses button.</small></div>
 </section>
 
 <section id="drawing">
@@ -100,14 +124,14 @@ small{color:var(--muted)}.rtl{direction:rtl;text-align:right}
 
 <section id="rokid">
 <button class="back" onclick="home()">← Home</button><h2>Rokid / AIUI Development</h2>
-<div class="card"><b>Current deployment</b><br>Android phone companion APK</div>
-<div class="card"><b>Prepared integration boundary</b><br>CXR-L / Hi Rokid → glasses display, microphone, camera and controls.</div>
-<div class="card alert"><b>Pending physical-device integration</b><br><small>This APK can run independently now. Rokid SDK calls require validation against your exact glasses/firmware.</small></div>
+<div class="card"><b>Current deployment</b><br>Standalone Android APK running directly on Rokid glasses.</div>
+<div class="card"><b>v0.4 hardware gate</b><br>Native Camera2, microphone, physical keys, IMU, network and storage diagnostics.</div>
+<div class="card alert"><b>Next after hardware validation</b><br><small>Live speech-to-text and Halliday-style proactive cue engine.</small></div>
 </section>
 
 <section id="release">
 <button class="back" onclick="home()">← Home</button><h2>Releases & Test Builds</h2>
-<div class="card"><b>v0.3.1</b><br><small>Single Android APK shell · nine modules · EN/AR/ZH UI mode · offline meeting/site/document rules · Rokid gateway boundary.</small></div>
+<div class="card"><b>v0.4.0</b><br><small>Standalone glasses build · direct camera · mic recording/playback · key detection · IMU · network · storage · EN/AR/ZH.</small></div>
 <div class="card"><b>Release gates</b><br>Install → launch → navigation → meeting analysis → site record → document/contract checks → language switch → physical Rokid integration.</div>
 </section>
 </div>
@@ -151,5 +175,23 @@ function setLang(v){
  else if(v==='zh')s.textContent='合同风险提示：承诺前确认书面指令，并评估工期和费用影响。';
  else s.textContent='Contractual alert: confirm written instruction and assess time/cost implications before committing.';
 }
+function hasNative(){return typeof PDCueNative!=='undefined'}
+function nativeDiagnosticResult(type,ok,message){
+ const el=document.getElementById('diag_'+type);
+ if(el) el.innerHTML='<b>'+(ok?'PASS / ACTIVE':'REVIEW')+'</b><div class="result">'+esc(message)+'</div>';
+ if(type==='camera'){
+   const s=document.getElementById('siteCamStatus');
+   if(s) s.innerHTML='<b>'+(ok?'CAMERA':'CAMERA REVIEW')+'</b><div class="result">'+esc(message)+'</div>';
+ }
+}
+function nativeCamera(){if(hasNative())PDCueNative.cameraTest();else nativeDiagnosticResult('camera',false,'Native bridge unavailable.')}
+function diagCamera(){nativeCamera()}
+function diagMic(){if(hasNative())PDCueNative.micTest();else nativeDiagnosticResult('mic',false,'Native bridge unavailable.')}
+function diagPlay(){if(hasNative())PDCueNative.playMic();else nativeDiagnosticResult('mic',false,'Native bridge unavailable.')}
+function diagImu(){if(hasNative())PDCueNative.imuTest();else nativeDiagnosticResult('imu',false,'Native bridge unavailable.')}
+function diagNetwork(){nativeDiagnosticResult('network',true,hasNative()?PDCueNative.networkStatus():'Native bridge unavailable.')}
+function diagStorage(){nativeDiagnosticResult('storage',true,hasNative()?PDCueNative.storageTest():'Native bridge unavailable.')}
+function diagDevice(){document.getElementById('diag_device').textContent=hasNative()?PDCueNative.deviceInfo():'Native bridge unavailable.'}
+function armKeys(){nativeDiagnosticResult('key',true,'Listening. Press any physical/touch key now.')}
 </script>
 </body></html>
